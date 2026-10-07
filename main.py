@@ -27,17 +27,19 @@ class WeatherData():
 country_dict = defaultdict(list)
 
 with open("Cities.txt", "r", encoding="utf-8-sig") as f:
-    data = f.readlines()
-for line in data:
-    with urllib.request.urlopen(f"{url}{line.strip()}?format=j1") as response:
-        data = json.load(response)
-        weather_data = WeatherData(
-            city=line.strip(),
-            temperature=Temperature(float(data["current_condition"][0]["temp_C"])),
-            country=data["nearest_area"][0]["country"][0]["value"]
-        )
-        country_dict[weather_data.country].append(weather_data)
-        print(weather_data)
+    for line in f:
+        try:
+            with urllib.request.urlopen(f"{url}{line.strip()}?format=j1") as response:
+                data = json.load(response)
+                weather_data = WeatherData(
+                    city=line.strip(),
+                    temperature=Temperature(float(data["current_condition"][0]["temp_C"])),
+                    country=data["nearest_area"][0]["country"][0]["value"]
+                )
+                country_dict[weather_data.country].append(weather_data)
+                print(weather_data)
+        except Exception as e:
+            print(f"Error fetching data for {line.strip()}: {e}")
 for country, weather_data_list in country_dict.items():
     current_min_temp = weather_data_list[0].temperature.value
     current_max_temp = weather_data_list[0].temperature.value
